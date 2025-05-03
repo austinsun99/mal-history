@@ -83,16 +83,21 @@ func writeEntryScores(file string, entryScores []EntryInfo) {
 func updateScores() {
 
 	entryScores := readEntryScores("data/scores.json")
-	doc := getPage("https://myanimelist.net/topanime.php")
+	//doc := getPage("https://myanimelist.net/topanime.php")
+
+	file, _ := os.Open("ignore/top.html")
+	doc, _ := html.Parse(file)
+
 	entries := getEntries(doc)
 
 	for _, entry := range entries {
 		name, score := getNameFromEntry(entry), getScoreFromEntry(entry)
+		nowFormatted := time.Now().Format("2006-01-02")
 
 		entryAlreadyExists := false
 		for i, entryScore := range entryScores {
 			if entryScore.Name == name {
-				entryScores[i].Points[time.Now().Format("2006-01-02")] = score
+				entryScores[i].Points[nowFormatted] = score
 				entryAlreadyExists = true
 			}
 		}
@@ -100,7 +105,9 @@ func updateScores() {
 		if !entryAlreadyExists {
 			entryScores = append(entryScores, EntryInfo{
 				Name:   name,
-				Points: make(map[string]float64),
+				Points: map[string]float64{
+					nowFormatted: score,
+				},
 			})
 		}
 	}

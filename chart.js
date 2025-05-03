@@ -1,13 +1,5 @@
 window.onload = async _ => {
 
-	try {
-		const res = await fetch("http://localhost:8080/api/data");
-		const data = await res.json();
-		console.log("Receieved from Go: ", data.message)
-	} catch (e) {
-		console.error(e)
-	}
-
 	/** @type {ChartInfo} */
 	const chartInfo = {
 		name: "History",
