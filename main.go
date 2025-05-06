@@ -1,21 +1,28 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"time"
 
 	"golang.org/x/net/html"
 )
 
+type Point struct {
+	Date  int64   `json:"date"`
+	Score float64 `json:"score"`
+}
+
 type EntryInfo struct {
-	Name   string             `json:"name"`
-	Points map[string]float64 `json:"points"`
+	Name   string  `json:"name"`
+	Points []Point `json:"points"`
 }
 
 func main() {
@@ -91,13 +98,19 @@ func updateScores() {
 	entries := getEntries(doc)
 
 	for _, entry := range entries {
+
+		now := time.Now().UnixMilli()
 		name, score := getNameFromEntry(entry), getScoreFromEntry(entry)
-		nowFormatted := time.Now().Format("2006-01-02")
+
+		point := Point{
+			Date:  now,
+			Score: score,
+		}
 
 		entryAlreadyExists := false
 		for i, entryScore := range entryScores {
 			if entryScore.Name == name {
-				entryScores[i].Points[nowFormatted] = score
+				entryScores[i].Points = append(entryScore.Points, point)
 				entryAlreadyExists = true
 			}
 		}
@@ -105,15 +118,13 @@ func updateScores() {
 		if !entryAlreadyExists {
 			entryScores = append(entryScores, EntryInfo{
 				Name:   name,
-				Points: map[string]float64{
-					nowFormatted: score,
-				},
+				Points: []Point{point},
 			})
 		}
 	}
 
+	sortEntriesByLatestScore(&entryScores)
 	writeEntryScores("data/scores.json", entryScores)
-
 }
 
 func getNameFromEntry(entry *html.Node) string {
@@ -168,4 +179,16 @@ func getHtmlNodes(content *html.Node, key string, val string) ([]*html.Node, err
 		return nil, errors.New(fmt.Sprintf("Could not find element with key: %s, value: %s", key, val))
 	}
 	return nodes, nil
+}
+
+func sortEntriesByLatestScore(entries *[]EntryInfo) {
+
+	compare := func(a, b EntryInfo) int {
+		latestPointA := a.Points[len(a.Points) - 1].Date
+		latestPointB := b.Points[len(b.Points) - 1].Date
+		return cmp.Compare(latestPointA, latestPointB)
+	}
+
+	slices.SortFunc(*entries, compare)
+
 }

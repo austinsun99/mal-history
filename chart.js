@@ -1,42 +1,9 @@
-window.onload = async _ => {
-
-	/** @type {ChartInfo} */
-	const chartInfo = {
-		name: "History",
-		xAxisText: [
-			{ position: 0.00, text: "2020" },
-			{ position: 0.25, text: "2021" },
-			{ position: 0.50, text: "2022" },
-			{ position: 0.75, text: "2023" },
-			{ position: 1.00, text: "2024" },
-		],
-		yAxisText: [
-			{ position: 0.00, text: "9" },
-			{ position: 0.25, text: "9.25" },
-			{ position: 0.50, text: "9.5" },
-			{ position: 0.75, text: "9.75" },
-			{ position: 1.00, text: "10" },
-		],
-		axesWidth: 5,
-		axesTextPadding: 10,
-		dataSets: [
-			{
-				name: "AT",
-				points: [{ x: 0, y: 0 }, { x: 0.2, y: 0.4 }, { x: 0.3, y: 0.5 }, { x: 1, y: 0.2 }]
-			}
-		]
-	}
-
-	/** @constant {HTMLCanvasElement} */
-	const chart = document.getElementById("ranking-canvas");
-
-	drawLineChart(chartInfo, chart);
-}
+export {drawLineChart}
 
 /**
  * @typedef DataSet - A set of points and its associated information
  * @type {object}
- * @property {string} name - Name of the data set
+ * @property {string} name
  * @property {Array.<{x: number, y: number}>} points - The set of points, 0 <= x, y <= 1, represents
  * the location along the axes as a percentage
  */
@@ -52,6 +19,7 @@ window.onload = async _ => {
  * @property {number} axesWidth - width of axes lines
  * @property {number} axesTextPadding - space between the axes lines and the text
  * @property {Array.<DataSet>} dataSets
+ * @property {int} maxDataSetsToShow - The max number of data sets the chart can show
  */
 
 /**
@@ -73,8 +41,8 @@ function drawLineChart(chartInfo, chartCanvas) {
 	/** @type {BoundingBox} */
 	const boundingBox = drawChartGrid(chartInfo, chartCanvas);
 
-	for (const dataSet of chartInfo.dataSets) {
-		DrawDataSet(boundingBox, dataSet, chartCanvas);
+	for (let i = 0; i < Math.min(chartInfo.dataSets.length, chartInfo.maxDataSetsToShow); i++) {
+		DrawDataSet(boundingBox, chartInfo.dataSets[i], chartCanvas);
 	}
 
 }
