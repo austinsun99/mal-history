@@ -89,12 +89,9 @@ func writeEntryScores(file string, entryScores []EntryInfo) {
 
 func updateScores() {
 
+	doc := getPage("https://myanimelist.net/topanime.php")
+
 	entryScores := readEntryScores("data/scores.json")
-	//doc := getPage("https://myanimelist.net/topanime.php")
-
-	file, _ := os.Open("ignore/top.html")
-	doc, _ := html.Parse(file)
-
 	entries := getEntries(doc)
 
 	for _, entry := range entries {
