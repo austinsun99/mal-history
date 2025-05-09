@@ -24,7 +24,7 @@ jobs:
     - name: Update scores
       run: | 
         go run main.go
-        git config user.name austinsun99
+        git config user.name githubActions
         git config user.email austinsun102@gmail.com
         git add .
         git commit -m "score update"
